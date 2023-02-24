@@ -56,7 +56,7 @@ your `.vimrc` file.
 1. Add the following line to your `.vimrc`.
 
 ```vim
-plug#begin('/home/groth/.vim/autoload')
+call plug#begin('/home/groth/.vim/autoload')
 Plug 'mittelmark/git-gutter-vim'
 call plug#end()
 ```
