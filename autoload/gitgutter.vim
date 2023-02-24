@@ -11,7 +11,11 @@ endfunction
 
 " initialization
 function! s:init()
-     let ctermbg = s:get_hl('SignColumn', 'bg', 'cterm')
+    if !exists('g:gittergut_signbg')
+        let ctermbg = s:get_hl('SignColumn', 'bg', 'cterm')
+    else
+        let ctermbg = g:gittergut_signbg
+    endif
      let guibg   = s:get_hl('SignColumn', 'bg', 'gui')
     for type in ["Add", "Change", "Delete"]
         if type == 'Delete'
