@@ -61,7 +61,7 @@ Plug 'mittelmark/git-gutter-vim'
 call plug#end()
 ```
 
-2. Run therafter thie command on vim.
+2. Run therafter this command in vim.
 
 ```vim
 :PlugInstall
