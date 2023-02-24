@@ -36,8 +36,6 @@ The original author was
 [akiomik](https://github.com/akiomik/git-gutter-vim), but the plugin does not
 worked anymore with newer versions of git and vim.
 
-
-
 ## Quick installation 
 
 ### Using Git only
@@ -71,6 +69,31 @@ call plug#end()
 
 For other plugin managers check the documentation.
 
+## FAQ
+
+- I am not happy with the background color for the sign column, how can I change
+  this:
+- Usually the sign colors are taken from the SignColor settings but sometimes
+  they do not match the background of the text editor, try something like his in your
+  `.vimrc`:
+
+```vim
+" ~/.vimrc
+" for colors see here: https://www.ditig.com/256-colors-cheat-sheet
+set t_Co=256
+set background=dark
+colorscheme=default
+" setting a slightly grey background for 
+" gitter symbols and the sign column which should fit with most colorschemes
+let g:gittergut_signbg=234
+hi SignColumn ctermbg=234
+```
+
+## TODO's
+
+- manual color declaration with variables in `.vimrc`
+- extracting the right colors from a schema automatically if possible
+
 ## License
 
-  The MIT License. See `LICENSE`.
+The MIT License. See `LICENSE`.
