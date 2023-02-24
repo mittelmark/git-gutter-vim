@@ -1,45 +1,35 @@
 " get sign ctrembg color
-function! s:get_sign_ctermbg()
-    redir => sign_col
-        silent hi SignColumn
-    redir END
-
-    let index = match(sign_col, 'ctermbg')
-    "may return values like 'ctermbg=8' or 'ctermbg=256'
-    let ctermbg_str = matchstr(sign_col, 'ctermbg=\d\+')
-    let val_len = strlen(ctermbg_str) - 8
-    let ctermbg = strpart(sign_col, index + 8, val_len)
-    return ctermbg
+function! s:get_hl(group, what, mode) abort
+    let r = synIDattr(synIDtrans(hlID(a:group)), a:what, a:mode)
+    if empty(r) || r == -1
+        return 'NONE'
+    endif
+    return r
 endfunction
-
-
-" get sign guibg color
-function! s:get_sign_guibg()
-    redir => sign_col
-        silent hi SignColumn
-    redir END
-
-    let index = match(sign_col, 'guibg')
-    let guibg = strpart(sign_col, index + 6, 7)
-    return guibg
-endfunction
-
+                    
+                            
 
 " initialization
 function! s:init()
-    let ctermbg = s:get_sign_ctermbg()
-    let guibg = s:get_sign_guibg()
-
-    exec 'hi gitGutterChange ctermfg=darkyellow guifg=#ffcc00 ctermbg=' . ctermbg . ' guibg=' . guibg . ' cterm=bold gui=bold'
-    exec 'hi gitGutterAdd    ctermfg=darkgreen  guifg=#00ee00 ctermbg=' . ctermbg . ' guibg=' . guibg . ' cterm=bold gui=bold'
-    exec 'hi gitGutterDelete ctermfg=darkred    guifg=#dd0000 ctermbg=' . ctermbg . ' guibg=' . guibg . ' cterm=bold gui=bold'
-
+     let ctermbg = s:get_hl('SignColumn', 'bg', 'cterm')
+     let guibg   = s:get_hl('SignColumn', 'bg', 'gui')
+    for type in ["Add", "Change", "Delete"]
+        if type == 'Delete'
+            let ctermfg = 88 "s:get_hl('DiffDelete', 'fg', 'cterm')
+        elseif type == 'Add'
+            let ctermfg = 78
+        else        
+            let ctermfg = s:get_hl('WarningMsg', 'fg', 'cterm')
+        endif
+        let guifg = s:get_hl('WarningMsg', 'fg', 'gui')
+        "let ctermfg = 88
+        exec 'hi gitGutter'.type . ' ctermfg=' . ctermfg . ' guifg=' . guifg . ' ctermbg=' . ctermbg . ' guibg=' . guibg . ' cterm=bold gui=bold'
+    endfor
     sign define change        text=! texthl=gitGutterChange
     sign define add           text=+ texthl=gitGutterAdd
     sign define delete_top    text=^ texthl=gitGutterDelete
     sign define delete_bottom text=_ texthl=gitGutterDelete
 endfunction
-
 
 " mark a gutter
 " name:  sign name
@@ -105,19 +95,33 @@ endfunction
 
 
 " get different between HEAD and current
-" current: current file path
+" current: current file path 
 function! s:get_diff(current)
     let current = shellescape(a:current)
     let filename = expand("%:t")
     let filedir = shellescape(expand("%:p:h"))
-    let prefix = system('cd ' . filedir . '; git rev-parse --show-prefix; cd -')[ :-2]
-    let path = shellescape(prefix . filename)
-    let diff = system('cd ' . filedir . '; git show HEAD:' . path . ' | diff - ' . current . '; cd -')
+    let prefix = system('cd ' . filedir . '; git rev-parse --show-prefix; cd - > /dev/null')[ :-2] "[ :-2]
+    let path = prefix . filename "shellescape(prefx . filename)
+    "echom 'prefix:' . prefix
+    let diff = system('cd ' . filedir . '; git show HEAD:' . path . ' | diff - ' . current . '; cd - > /dev/null' )
     return split(diff, '\n')
 endfunction
 
+" show and hide bufferwise
+function! gitgutter#git_gutter_toggle()
+    if !exists("b:gitgutter_show")
+        let b:gitgutter_show = 0
+    else
+        let b:gitgutter_show = !b:gitgutter_show
+    endif
+    if (!b:gitgutter_show)
+        exe 'set scl=no'
+    else    
+        exe 'set scl=auto'
+    endif    
+endfunction
 
-" git gutter
+" git gutter main function
 function! gitgutter#git_gutter()
     " check for a git repo
     if (!s:is_git_repos())
@@ -126,9 +130,8 @@ function! gitgutter#git_gutter()
 
     " check for a file stat
     if (!s:is_modified())
-"       return
+       "return
     endif
-
     " get diff
     let current = s:get_current_file_path()
     silent execute 'write! ' . escape(current, ' ')
@@ -175,5 +178,5 @@ function! gitgutter#git_gutter()
 endfunction
 
 
-" main
+" main entry
 call s:init()
