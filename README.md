@@ -67,7 +67,7 @@ call plug#end()
 :PlugInstall
 ```
 
-For other plugin managers check the documentation.
+For other plugin managers check their documentation.
 
 ## FAQ
 
